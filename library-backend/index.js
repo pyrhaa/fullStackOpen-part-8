@@ -1,4 +1,5 @@
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, UserInputError, gql } = require('apollo-server');
+const { v1: uuid } = require('uuid');
 
 let authors = [
   {
@@ -91,7 +92,6 @@ const typeDefs = gql`
     born: Int
     bookCount: Int!
   }
-
   type Book {
     title: String!
     published: Int!
@@ -99,12 +99,20 @@ const typeDefs = gql`
     id: ID!
     genres: [String!]!
   }
-
   type Query {
     bookCount: Int!
     authorCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+  }
+
+  type Mutation {
+    addBook(
+      title: String!
+      published: Int!
+      author: String!
+      genres: [String!]!
+    ): Book
   }
 `;
 
@@ -131,6 +139,28 @@ const resolvers = {
   Author: {
     bookCount: (root) =>
       books.filter((book) => book.author === root.name).length
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      const authExist = authors.find((a) => a.name === args.author);
+      const bookExist = books.find((b) => b.title === args.title);
+      if (authExist && bookExist) {
+        throw new UserInputError('Book title of this author exists', {
+          invalidArgs: args.title
+        });
+      }
+
+      if (!authExist) {
+        const newAuthor = {
+          name: args.author,
+          id: uuid()
+        };
+        authors = authors.concat(newAuthor);
+      }
+      const book = { ...args, id: uuid() };
+      books = books.concat(book);
+      return book;
+    }
   }
 };
 
