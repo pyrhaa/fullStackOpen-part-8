@@ -2,7 +2,12 @@ const Authors = ({ resultAuthors, show }) => {
   if (!show) {
     return null;
   }
-  const authors = resultAuthors || [];
+
+  if (resultAuthors.loading) {
+    return <div>loading...</div>;
+  }
+
+  const authors = resultAuthors.data.allAuthors || [];
 
   return (
     <div>

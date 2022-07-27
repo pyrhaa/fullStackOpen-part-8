@@ -5,17 +5,14 @@ import Books from './components/Books';
 import NewBook from './components/NewBook';
 import Notify from './components/Notify';
 
-import { ALL_AUTHORS } from './queries';
+import { ALL_AUTHORS, ALL_BOOKS } from './queries';
 
 const App = () => {
-  const result = useQuery(ALL_AUTHORS);
+  const resultAuthors = useQuery(ALL_AUTHORS);
+  const resultBooks = useQuery(ALL_BOOKS);
 
   const [page, setPage] = useState('authors');
   const [errorMessage, setErrorMessage] = useState(null);
-
-  if (result.loading) {
-    return <div>loading...</div>;
-  }
 
   const notify = (message) => {
     setErrorMessage(message);
@@ -33,12 +30,9 @@ const App = () => {
         <button onClick={() => setPage('add')}>add book</button>
       </div>
 
-      <Authors
-        show={page === 'authors'}
-        resultAuthors={result.data.allAuthors}
-      />
+      <Authors show={page === 'authors'} resultAuthors={resultAuthors} />
 
-      <Books show={page === 'books'} />
+      <Books show={page === 'books'} resultBooks={resultBooks} />
 
       <NewBook show={page === 'add'} setError={notify} />
     </div>
