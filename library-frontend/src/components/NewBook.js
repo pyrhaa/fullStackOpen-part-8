@@ -2,9 +2,13 @@ import { useState } from 'react';
 import { ALL_AUTHORS, ALL_BOOKS, ADD_BOOK } from '../queries';
 import { useMutation } from '@apollo/client';
 
-const NewBook = ({ show }) => {
+const NewBook = ({ show, setError }) => {
   const [addBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+    onError: (error) => {
+      console.log(error);
+      setError('You dont fully complete the form');
+    }
   });
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
