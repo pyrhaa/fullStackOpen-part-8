@@ -163,14 +163,18 @@ const resolvers = {
       return book;
     },
     editAuthor: (root, args) => {
-      const authorExist = authors.find((author) => author.name === args.name);
+      const authorExist = authors.find(
+        (author) => author.name.toLowerCase() === args.name.toLowerCase()
+      );
       if (!authorExist) {
         return null;
       }
 
       const updatedAuth = { ...authorExist, born: args.setBornTo };
       authors = authors.map((author) =>
-        author.name === args.name ? updatedAuth : author
+        author.name.toLowerCase() === args.name.toLowerCase()
+          ? updatedAuth
+          : author
       );
       return updatedAuth;
     }
