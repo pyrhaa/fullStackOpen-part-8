@@ -3,21 +3,20 @@ import { useMutation } from '@apollo/client';
 import { UPDATE_AUTHOR, ALL_AUTHORS } from '../queries';
 
 const Authors = ({ resultAuthors, show, setError }) => {
-  const [changeName, setChangeName] = useState('');
+  const [name, setName] = useState('');
   const [changeBorn, setChangeBorn] = useState('');
 
-  const [updateAuthor] = useMutation(UPDATE_AUTHOR, {
-    refetchQueries: [{ query: ALL_AUTHORS }]
-  });
+  const [updateAuthor] = useMutation(UPDATE_AUTHOR);
+
+  const born = parseInt(changeBorn);
 
   const submit = async (e) => {
     e.preventDefault();
-    console.log('name: ', changeName, 'born: ', changeBorn);
     await updateAuthor({
-      variables: { changeName, setBornTo: parseInt(changeBorn) }
+      variables: { name, born },
+      refetchQueries: [{ query: ALL_AUTHORS }]
     });
-
-    setChangeName('');
+    setName('');
     setChangeBorn('');
   };
 
@@ -55,8 +54,8 @@ const Authors = ({ resultAuthors, show, setError }) => {
         <div>
           Name
           <input
-            value={changeName}
-            onChange={({ target }) => setChangeName(target.value)}
+            value={name}
+            onChange={({ target }) => setName(target.value)}
           />
         </div>
         <div>
