@@ -23,7 +23,7 @@ const typeDefs = gql`
     name: String!
     id: ID!
     born: Int
-    bookCount: Int!
+    bookCount: Int
   }
   type Book {
     title: String!
@@ -55,7 +55,7 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      let books = await Book.find({});
+      const books = await Book.find({});
       if (args.author) {
         return books.filter((book) => book.author === args.author);
       } else if (args.genre) {
@@ -69,12 +69,23 @@ const resolvers = {
         return books;
       }
     },
-    allAuthors: () => Author.find({})
+    allAuthors: async () => {
+      const authors = await Author.find({});
+      return authors;
+    }
   },
   Author: {
-    bookCount: async (root) => {
-      let books = await Book.find({});
-      return books.filter((book) => book.author === root.name).length;
+    // bookCount: (root) => {
+    //   return Book.find({
+    //     author: { $in: root.name }
+    //   }).countDocuments();
+    // }
+    bookCount: (root) => {
+      // console.log(root.id);
+      const books = Book.find({});
+      const book = books.forEach((el) => el);
+      console.log(book);
+      return book;
     }
   },
   Mutation: {
