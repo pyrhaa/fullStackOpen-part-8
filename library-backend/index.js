@@ -51,23 +51,26 @@ const typeDefs = gql`
 `;
 
 const resolvers = {
+  Book: {
+    author: async (root) => {
+      const author = await Author.findOne({ _id: root.author });
+      return {
+        name: author.name,
+        born: author.born
+      };
+    }
+  },
   Query: {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
-    allBooks: async (root, args) => {
-      const books = await Book.find({});
-      if (args.author) {
-        return books.filter((book) => book.author === args.author);
-      } else if (args.genre) {
-        return books.filter((book) => book.genres.includes(args.genre));
-      } else if (args.author && args.genre) {
-        return books.filter(
-          (book) =>
-            book.author === args.author && book.genres.includes(args.genre)
-        );
-      } else {
-        return books;
+    allBooks: async (_root, args) => {
+      const { genre } = args;
+      if (genre) {
+        const allBooks = await Book.find({}).populate('author').exec();
+        const byGenre = allBooks.filter((book) => book.genres.includes(genre));
+        return byGenre;
       }
+      return Book.find({}).populate('author').exec();
     },
     allAuthors: async () => {
       const authors = await Author.find({});
@@ -75,17 +78,12 @@ const resolvers = {
     }
   },
   Author: {
-    // bookCount: (root) => {
-    //   return Book.find({
-    //     author: { $in: root.name }
-    //   }).countDocuments();
-    // }
-    bookCount: (root) => {
-      // console.log(root.id);
-      const books = Book.find({});
-      const book = books.forEach((el) => el);
-      console.log(book);
-      return book;
+    bookCount: async (author) => {
+      const authorCounted = await Author.findOne({ name: author.name });
+
+      return authorCounted
+        ? Book.collection.countDocuments({ author: { $eq: authorCounted._id } })
+        : 0;
     }
   },
   Mutation: {
