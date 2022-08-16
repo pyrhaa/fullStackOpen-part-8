@@ -64,11 +64,17 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (_root, args) => {
-      const { genre } = args;
+      const { author, genre } = args;
       if (genre) {
         const allBooks = await Book.find({}).populate('author').exec();
         const byGenre = allBooks.filter((book) => book.genres.includes(genre));
         return byGenre;
+      }
+
+      if (author) {
+        const allBooks = await Book.find({}).populate('author').exec();
+        const byAuthor = allBooks.filter((book) => book.author.name === author);
+        return byAuthor;
       }
       return Book.find({}).populate('author').exec();
     },
@@ -110,7 +116,8 @@ const resolvers = {
           });
         }
       }
-      const book = new Book({ ...args, author: authExist, id: uuid() });
+      const authObject = await Author.findOne({ name: args.author });
+      const book = new Book({ ...args, author: authObject, id: uuid() });
       try {
         await book.save();
       } catch (error) {
@@ -120,21 +127,20 @@ const resolvers = {
       }
       return book;
     },
-    editAuthor: (root, args) => {
-      const authorExist = authors.find(
-        (author) => author.name.toLowerCase() === args.name.toLowerCase()
-      );
-      if (!authorExist) {
+    editAuthor: async (root, args) => {
+      const authExist = await Author.findOne({ name: args.name });
+      if (!authExist) {
         return null;
       }
-
-      const updatedAuth = { ...authorExist, born: args.setBornTo };
-      authors = authors.map((author) =>
-        author.name.toLowerCase() === args.name.toLowerCase()
-          ? updatedAuth
-          : author
-      );
-      return updatedAuth;
+      authExist.born = args.setBornTo;
+      try {
+        await authExist.save();
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        });
+      }
+      return authExist.save();
     }
   }
 };
