@@ -87,9 +87,10 @@ const resolvers = {
     }
   },
   Mutation: {
-    addBook: (root, args) => {
-      const authExist = authors.find((a) => a.name === args.author);
-      const bookExist = books.find((b) => b.title === args.title);
+    addBook: async (root, args) => {
+      const authExist = await Author.findOne({ name: args.author });
+      const bookExist = await Book.findOne({ title: args.title });
+
       if (authExist && bookExist) {
         throw new UserInputError('Book title of this author exists', {
           invalidArgs: args.title
@@ -97,14 +98,26 @@ const resolvers = {
       }
 
       if (!authExist) {
-        const newAuthor = {
+        const newAuthor = new Author({
           name: args.author,
           id: uuid()
-        };
-        authors = authors.concat(newAuthor);
+        });
+        try {
+          await newAuthor.save();
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          });
+        }
       }
-      const book = { ...args, id: uuid() };
-      books = books.concat(book);
+      const book = new Book({ ...args, author: authExist, id: uuid() });
+      try {
+        await book.save();
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        });
+      }
       return book;
     },
     editAuthor: (root, args) => {
