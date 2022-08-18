@@ -35,8 +35,6 @@ const App = () => {
     }, 10000);
   };
 
-  // console.log('setToken: ', token);
-
   if (!token) {
     return (
       <>
@@ -50,6 +48,7 @@ const App = () => {
           show={page === 'authors'}
           resultAuthors={resultAuthors}
           setError={notify}
+          token={token}
         />
         <Books show={page === 'books'} resultBooks={resultBooks} />
         <LoginForm
