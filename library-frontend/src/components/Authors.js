@@ -10,6 +10,8 @@ const Authors = ({ resultAuthors, show, setError }) => {
 
   const born = parseInt(changeBorn);
 
+  // console.log('allAuthors: ', resultAuthors);
+
   const submit = async (e) => {
     e.preventDefault();
     await updateAuthor({

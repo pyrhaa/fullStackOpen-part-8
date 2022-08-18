@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN } from '../queries';
 
-const LoginForm = ({ setError, setToken }) => {
+const LoginForm = ({ setError, setToken, show }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const [login, result] = useMutation(LOGIN, {
     onError: (error) => {
+      // console.log('error: ', error);
+      // console.log('login: ', login);
+      // console.log('result: ', result);
       setError(error.graphQLErrors[0].message);
     }
   });
@@ -19,6 +22,10 @@ const LoginForm = ({ setError, setToken }) => {
       localStorage.setItem('library-user-token', token);
     }
   }, [result.data]); // eslint-disable-line
+
+  if (!show) {
+    return null;
+  }
 
   const submit = async (event) => {
     event.preventDefault();
@@ -44,7 +51,7 @@ const LoginForm = ({ setError, setToken }) => {
             onChange={({ target }) => setPassword(target.value)}
           />
         </div>
-        <button type="submit">login</button>
+        <button type="submit">submit</button>
       </form>
     </div>
   );
