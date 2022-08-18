@@ -35,6 +35,8 @@ const App = () => {
     }, 10000);
   };
 
+  // console.log('setToken: ', token);
+
   if (!token) {
     return (
       <>
