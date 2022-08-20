@@ -55,6 +55,7 @@ const App = () => {
           show={page === 'login'}
           setToken={setToken}
           setError={notify}
+          setPage={setPage}
         />
       </>
     );
@@ -72,6 +73,7 @@ const App = () => {
       <Authors
         show={page === 'authors'}
         resultAuthors={resultAuthors}
+        token={token}
         setError={notify}
       />
       <Books show={page === 'books'} resultBooks={resultBooks} />
