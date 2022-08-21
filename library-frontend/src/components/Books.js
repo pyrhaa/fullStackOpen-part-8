@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import BooksTab from './BooksTab';
 
 const Books = ({ show, resultBooks }) => {
   const [books, setBooks] = useState([]);
@@ -44,23 +45,7 @@ const Books = ({ show, resultBooks }) => {
   return (
     <div>
       <h2>books</h2>
-
-      <table>
-        <tbody>
-          <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
-          </tr>
-          {filteredBooks.map((a) => (
-            <tr key={a.id}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <BooksTab books={filteredBooks} />
       <div>
         {genres.length > 0 &&
           genres.map((genre) => (
