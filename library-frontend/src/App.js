@@ -7,11 +7,12 @@ import Notify from './components/Notify';
 import LoginForm from './components/LoginForm';
 import Recommend from './components/Recommend';
 
-import { ALL_AUTHORS, ALL_BOOKS } from './queries';
+import { ALL_AUTHORS, ALL_BOOKS, ME } from './queries';
 
 const App = () => {
   const resultAuthors = useQuery(ALL_AUTHORS);
   const resultBooks = useQuery(ALL_BOOKS);
+  const currentUser = useQuery(ME);
 
   const [token, setToken] = useState(null);
   const client = useApolloClient();
@@ -79,7 +80,11 @@ const App = () => {
         setError={notify}
       />
       <Books show={page === 'books'} resultBooks={resultBooks} />
-      <Recommend show={page === 'recommend'} />
+      <Recommend
+        show={page === 'recommend'}
+        resultBooks={resultBooks}
+        resultUser={currentUser}
+      />
       <NewBook show={page === 'add'} setError={notify} />
     </div>
   );

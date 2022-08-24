@@ -1,42 +1,43 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useLazyQuery } from '@apollo/client';
-import { ME, ALL_BOOKS_BY_GENRE, ALL_BOOKS } from '../queries';
+// import { useQuery } from '@apollo/client';
+// import { ME, ALL_BOOKS} from '../queries';
 import BooksTab from './BooksTab';
 
-const Recommend = ({ show }) => {
-  const me = useQuery(ME);
-  const [getFavBooks, result] = useLazyQuery(ALL_BOOKS_BY_GENRE, {
-    refetchQueries: [{ query: ALL_BOOKS }],
-    onError: (error) => {
-      console.log(error.graphQLErrors[0].message);
-    }
-  });
-  const [fav, setFav] = useState([]);
+const Recommend = ({ show, resultUser, resultBooks }) => {
+  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
 
   useEffect(() => {
-    if (me.data) {
-      getFavBooks({ variables: { genre: me.data.me.favouriteGenre } });
+    if (resultBooks.data) {
+      const allBooks = resultBooks.data.allBooks;
+      setBooks(allBooks);
     }
-  }, [getFavBooks, me]);
+  }, [resultBooks]);
 
   useEffect(() => {
-    if (result.data) {
-      setFav(result.data.allBooks);
+    if (resultUser.data) {
+      setSelectedGenre(resultUser.data.me.favouriteGenre);
     }
-  }, [result]);
+  }, [resultUser]);
+
+  useEffect(() => {
+    setFilteredBooks(
+      books.filter((b) => b.genres.indexOf(selectedGenre) !== -1)
+    );
+  }, [books, selectedGenre]);
 
   if (!show) {
     return null;
   }
-  console.log(result);
+
   return (
     <div>
       <h2>recommendations</h2>
       <p>
-        books in your favorite genre patterns:{' '}
-        <b>{me.data.me.favouriteGenre}</b>
+        books in your favorite genre patterns: <b>{selectedGenre}</b>
       </p>
-      <BooksTab books={fav} />
+      <BooksTab books={filteredBooks} />
     </div>
   );
 };
