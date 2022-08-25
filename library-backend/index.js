@@ -13,6 +13,8 @@ const mongoose = require('mongoose');
 const Book = require('./models/book');
 const Author = require('./models/author');
 const User = require('./models/user');
+const typeDefs = require('./schema');
+const resolvers = require('./resolvers');
 
 const JWT_SECRET = process.env.SECRET;
 
