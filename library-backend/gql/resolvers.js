@@ -4,6 +4,8 @@ const Author = require('../models/author');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const { v1: uuid } = require('uuid');
+const { PubSub } = require('graphql-subscriptions');
+const pubsub = new PubSub();
 
 const JWT_SECRET = process.env.SECRET;
 
@@ -90,6 +92,9 @@ const resolvers = {
           invalidArgs: args
         });
       }
+
+      pubsub.publish('BOOK_ADDED', { bookAdded: book });
+
       return book;
     },
     editAuthor: async (root, args, context) => {
@@ -139,6 +144,11 @@ const resolvers = {
       };
 
       return { value: jwt.sign(userForToken, JWT_SECRET) };
+    }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
     }
   }
 };
