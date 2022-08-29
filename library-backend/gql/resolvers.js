@@ -25,34 +25,31 @@ const resolvers = {
     allBooks: async (_root, args) => {
       const { author, genre } = args;
       if (genre) {
-        const allBooks = await Book.find({}).populate('author').exec();
+        const allBooks = await Book.find({ genres: { $in: genre } })
+          .populate('author')
+          .exec();
         const byGenre = allBooks.filter((book) => book.genres.includes(genre));
         return byGenre;
       }
 
       if (author) {
-        const allBooks = await Book.find({}).populate('author').exec();
+        const allBooks = await Book.find({ name: author })
+          .populate('author')
+          .exec();
         const byAuthor = allBooks.filter((book) => book.author.name === author);
         return byAuthor;
       }
-      return Book.find({}).populate('author').exec();
+      return await Book.find({}).populate('author').exec();
     },
     allAuthors: async () => {
-      const authors = await Author.find({});
-      return authors;
+      return Author.find({}).populate('books');
     },
     me: (root, args, context) => {
       return context.currentUser;
     }
   },
   Author: {
-    bookCount: async (author) => {
-      const authorCounted = await Author.findOne({ name: author.name });
-
-      return authorCounted
-        ? Book.collection.countDocuments({ author: { $eq: authorCounted._id } })
-        : 0;
-    }
+    bookCount: (root) => root.books.length
   },
   Mutation: {
     addBook: async (root, args, context) => {
@@ -86,7 +83,9 @@ const resolvers = {
       const authObject = await Author.findOne({ name: args.author });
       const book = new Book({ ...args, author: authObject, id: uuid() });
       try {
-        await book.save();
+        const savedBook = await book.save();
+        authObject.books = authObject.books.concat(savedBook._id);
+        await authObject.save();
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args
