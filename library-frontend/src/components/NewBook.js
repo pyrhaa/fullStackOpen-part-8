@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { ALL_AUTHORS, ALL_BOOKS, ADD_BOOK } from '../queries';
 import { useMutation } from '@apollo/client';
+import { updateCache } from '../App';
 
 const NewBook = ({ show, setError }) => {
   const [addBook] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
     onError: (error) => {
       console.log(error);
-      setError('You dont fully complete the form');
+      setError(
+        'You dont fully complete the form or this book from this author is already added'
+      );
+    },
+    update: (cache, response) => {
+      updateCache(cache, { query: ALL_BOOKS }, response.data.addBook);
     }
   });
   const [title, setTitle] = useState('');
