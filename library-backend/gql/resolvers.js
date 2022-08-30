@@ -58,8 +58,14 @@ const resolvers = {
       );
       return byAuthor;
     },
-    bookCount: (root) => {
-      console.log('log of root: ', root);
+    bookCount: async (root) => {
+      const allBooks = await Book.find({ name: root.name })
+        .populate('author')
+        .exec();
+      const booksLength = allBooks.filter(
+        (book) => book.author.name === root.name
+      ).length;
+      return booksLength;
     }
   },
   Mutation: {
