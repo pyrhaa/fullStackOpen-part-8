@@ -42,14 +42,25 @@ const resolvers = {
       return await Book.find({}).populate('author').exec();
     },
     allAuthors: async () => {
-      return Author.find({}).populate('books');
+      return Author.find({}).populate('books').exec();
     },
     me: (root, args, context) => {
       return context.currentUser;
     }
   },
   Author: {
-    bookCount: (root) => root.books.length
+    books: async (root) => {
+      const allBooks = await Book.find({ name: root.name })
+        .populate('author')
+        .exec();
+      const byAuthor = allBooks.filter(
+        (book) => book.author.name === root.name
+      );
+      return byAuthor;
+    },
+    bookCount: (root) => {
+      console.log('log of root: ', root);
+    }
   },
   Mutation: {
     addBook: async (root, args, context) => {
